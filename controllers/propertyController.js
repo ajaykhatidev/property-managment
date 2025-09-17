@@ -22,14 +22,16 @@ const addProperty = async (req, res) => {
 const getProperties = async (req, res) => {
   try {
     const properties = await Property.find()
-      .select('title price location images createdAt') // Sirf zaroori fields
+      .select(
+        "title price location images createdAt rentOrSale status description houseNo block pocket reference bhk hpOrFreehold floor phoneNumber"
+      ) // ✅ frontend required fields
       .sort({ createdAt: -1 }) // Latest first
-      .lean(); // MongoDB optimization - 40-50% faster
+      .lean();
 
     res.status(200).json(properties);
   } catch (error) {
-    console.error('Error fetching properties:', error);
-    res.status(500).json({ message: 'Failed to fetch properties' });
+    console.error("Error fetching properties:", error);
+    res.status(500).json({ message: "Failed to fetch properties" });
   }
 };
 
