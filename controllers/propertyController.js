@@ -21,19 +21,91 @@ const addProperty = async (req, res) => {
 // =====================
 const getProperties = async (req, res) => {
   try {
-    const properties = await Property.find()
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      rentOrSale,
+      minPrice,
+      maxPrice,
+      location,
+      bhk
+    } = req.query;
+
+    // Build filter object
+    const filter = {};
+    
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (rentOrSale) filter.rentOrSale = rentOrSale;
+    if (location) filter.location = { $regex: location, $options: 'i' };
+    if (bhk) filter.bhk = bhk;
+    
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = parseInt(minPrice);
+      if (maxPrice) filter.price.$lte = parseInt(maxPrice);
+    }
+
+    // Calculate skip value for pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Get total count for pagination info
+    const totalProperties = await Property.countDocuments(filter);
+
+    // Fetch properties with pagination and filters
+    const properties = await Property.find(filter)
       .select(
         "title price location images createdAt rentOrSale status description houseNo block pocket reference bhk hpOrFreehold floor phoneNumber"
-      ) // ✅ frontend required fields
-      .sort({ createdAt: -1 }) // Latest first
-      .lean();
+      )
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean(); // ✅ Keep lean() for better performance
 
-    res.status(200).json(properties);
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalProperties / parseInt(limit));
+    const hasNext = parseInt(page) < totalPages;
+    const hasPrev = parseInt(page) > 1;
+
+    res.status(200).json({
+      properties,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalProperties,
+        hasNext,
+        hasPrev,
+        limit: parseInt(limit)
+      }
+    });
+
   } catch (error) {
     console.error("Error fetching properties:", error);
     res.status(500).json({ message: "Failed to fetch properties" });
   }
 };
+
+// Additional optimization: Add indexes to your MongoDB collection
+// Run these in MongoDB shell or add to your schema:
+/*
+db.properties.createIndex({ createdAt: -1 })
+db.properties.createIndex({ rentOrSale: 1 })
+db.properties.createIndex({ location: 1 })
+db.properties.createIndex({ price: 1 })
+db.properties.createIndex({ bhk: 1 })
+db.properties.createIndex({ 
+  title: "text", 
+  location: "text", 
+  description: "text" 
+})
+*/
 
 // =====================
 // Get single property by ID
