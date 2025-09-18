@@ -26,6 +26,7 @@ const getProperties = async (req, res) => {
       limit = 20,
       search,
       rentOrSale,
+      status,       // ✅ status query param
       minPrice,
       maxPrice,
       location,
@@ -34,19 +35,20 @@ const getProperties = async (req, res) => {
 
     // Build filter object
     const filter = {};
-    
+
     if (search) {
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { location: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { title: { $regex: search, $options: "i" } },
+        { location: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
       ];
     }
-    
+
     if (rentOrSale) filter.rentOrSale = rentOrSale;
-    if (location) filter.location = { $regex: location, $options: 'i' };
+    if (status) filter.status = status; // ✅ Added status filter
+    if (location) filter.location = { $regex: location, $options: "i" };
     if (bhk) filter.bhk = bhk;
-    
+
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = parseInt(minPrice);
@@ -67,7 +69,7 @@ const getProperties = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .lean(); // ✅ Keep lean() for better performance
+      .lean();
 
     // Calculate pagination info
     const totalPages = Math.ceil(totalProperties / parseInt(limit));
@@ -82,15 +84,15 @@ const getProperties = async (req, res) => {
         totalProperties,
         hasNext,
         hasPrev,
-        limit: parseInt(limit)
-      }
+        limit: parseInt(limit),
+      },
     });
-
   } catch (error) {
     console.error("Error fetching properties:", error);
     res.status(500).json({ message: "Failed to fetch properties" });
   }
 };
+
 
 // Additional optimization: Add indexes to your MongoDB collection
 // Run these in MongoDB shell or add to your schema:
