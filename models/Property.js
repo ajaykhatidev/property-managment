@@ -2,10 +2,30 @@ const mongoose = require("mongoose");
 
 const propertySchema = new mongoose.Schema(
   {
+    sector: {
+      type: String, // Keep as string so you can handle both numbers and "Other"
+      required: true,
+      trim: true,
+    },
     title: {
       type: String,
       required: true,
       trim: true,
+      enum: [
+        "JANTA",
+        "LIG",
+        "MIG",
+        "HIG",
+        "26M",
+        "48M",
+        "60M",
+        "90M",
+        "52M",
+        "96M",
+        "120M",
+        "Plot",
+        "Others",
+      ],
     },
     description: {
       type: String,
@@ -53,9 +73,10 @@ const propertySchema = new mongoose.Schema(
       required: true,
       validate: {
         validator: function (v) {
-          return /^[0-9]{10}$/.test(v); // ✅ 10 digit phone number validation
+          return /^[0-9]{10}$/.test(v); // ✅ 10-digit phone number validation
         },
-        message: (props) => `${props.value} is not a valid 10-digit phone number!`,
+        message: (props) =>
+          `${props.value} is not a valid 10-digit phone number!`,
       },
     },
     status: {
