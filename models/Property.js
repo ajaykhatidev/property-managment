@@ -24,11 +24,17 @@ const propertySchema = new mongoose.Schema(
         "96M",
         "120M",
         "Plot",
+        "DDA MARKET",
         "Others",
       ],
     },
     description: {
       type: String,
+      required: true,
+    },
+    propertyType: {
+      type: String,
+      enum: ["House", "Shop"],
       required: true,
     },
     houseNo: {
@@ -43,21 +49,21 @@ const propertySchema = new mongoose.Schema(
     },
     floor: {
       type: String,
+      enum: ["0", "1", "2", "3", "4", "5", "Kothi", "Plot"],
     },
     bhk: {
-      type: Number,
+      type: String,
       required: true,
-      min: 1,
-      max: 10,
+      enum: ["1", "2", "3", "4", "5", "RK", "0"],
     },
     rentOrSale: {
       type: String,
-      enum: ["Rent", "Sale"],
+      enum: ["Rent", "Sale", "Lease"],
       required: true,
     },
     hpOrFreehold: {
       type: String,
-      enum: ["HP", "Freehold"],
+      enum: ["HP", "Freehold", "Lease"],
       required: true,
     },
     reference: {

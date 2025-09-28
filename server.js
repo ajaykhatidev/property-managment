@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db"); 
 const propertyRoutes = require("./routes/propertyRoutes");
+const clientRoutes = require("./routes/clientRoutes");
 const cors = require("cors");
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/properties", propertyRoutes);
+app.use("/api/clients", clientRoutes);
 
 
 app.listen(PORT, () => {

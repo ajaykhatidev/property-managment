@@ -15,18 +15,61 @@ const clearPropertiesCache = () => {
 // =====================
 const addProperty = async (req, res) => {
   try {
+    console.log("📝 Received property data:", req.body);
+    
+    // Validate required fields
+    const requiredFields = ['sector', 'title', 'description', 'propertyType', 'houseNo', 'bhk', 'rentOrSale', 'hpOrFreehold', 'price', 'phoneNumber'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        message: `Missing required fields: ${missingFields.join(', ')}` 
+      });
+    }
+    
+    // Validate phone number format
+    if (!/^[0-9]{10}$/.test(req.body.phoneNumber)) {
+      return res.status(400).json({ 
+        message: "Phone number must be exactly 10 digits" 
+      });
+    }
+    
+    // Validate price
+    if (req.body.price <= 0) {
+      return res.status(400).json({ 
+        message: "Price must be greater than 0" 
+      });
+    }
+    
     const property = await Property.create(req.body);
     
     // Clear cache after adding new property
     clearPropertiesCache();
     
+    console.log("✅ Property created successfully:", property._id);
+    
     res.status(201).json({
+      success: true,
       message: "Property saved successfully!",
       data: property,
     });
   } catch (error) {
-    console.error(error);
-    res.status(400).json({ message: error.message });
+    console.error("❌ Error creating property:", error);
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ 
+        success: false,
+        message: "Validation failed", 
+        errors: validationErrors 
+      });
+    }
+    
+    res.status(400).json({ 
+      success: false,
+      message: error.message 
+    });
   }
 };
 
@@ -61,8 +104,10 @@ const getProperties = async (req, res) => {
       const typeFilters = {
         sellSold: { rentOrSale: "Sale", status: "Sold" },
         rentSold: { rentOrSale: "Rent", status: "Sold" },
+        leaseSold: { rentOrSale: "Lease", status: "Sold" },
         saleAvailable: { rentOrSale: "Sale", status: "Available" },
-        rentAvailable: { rentOrSale: "Rent", status: "Available" }
+        rentAvailable: { rentOrSale: "Rent", status: "Available" },
+        leaseAvailable: { rentOrSale: "Lease", status: "Available" }
       };
       
       if (typeFilters[req.query.type]) {
