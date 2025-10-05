@@ -41,6 +41,10 @@ const propertySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    shopSize: {
+      type: String,
+      trim: true,
+    },
     block: {
       type: String,
     },
