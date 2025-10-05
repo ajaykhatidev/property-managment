@@ -64,7 +64,7 @@ const propertySchema = new mongoose.Schema(
     },
     floor: {
       type: String,
-      enum: ["0", "1", "2", "3", "4", "5", "Kothi", "Plot"],
+      enum: ["0", "1", "2", "3", "4", "5", "Kothi", "Plot","Ground Floor"],
     },
     bhk: {
       type: String,
