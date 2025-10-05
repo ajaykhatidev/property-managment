@@ -20,9 +20,10 @@ const addProperty = async (req, res) => {
     console.log("🏠 House No:", req.body.houseNo);
     console.log("🏪 Shop No:", req.body.shopNo);
     console.log("📏 Shop Size:", req.body.shopSize);
+    console.log("🏢 Property Category:", req.body.propertyCategory);
     
     // Validate required fields
-    const requiredFields = ['sector', 'title', 'description', 'propertyType', 'bhk', 'rentOrSale', 'hpOrFreehold', 'price', 'phoneNumber'];
+    const requiredFields = ['sector', 'title', 'description', 'propertyType', 'propertyCategory', 'bhk', 'rentOrSale', 'hpOrFreehold', 'price', 'phoneNumber'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
     
     // Conditional validation based on property type
@@ -174,7 +175,7 @@ const getProperties = async (req, res) => {
     // Optimized query with lean() for better performance
     const properties = await Property
       .find(filter)
-      .select('sector title description propertyType houseNo shopNo shopSize block pocket floor bhk rentOrSale hpOrFreehold reference price phoneNumber status createdAt updatedAt')
+      .select('sector title description propertyType houseNo shopNo shopSize block pocket floor propertyCategory bhk rentOrSale hpOrFreehold reference price phoneNumber status createdAt updatedAt')
       .sort(sortOptions)
       .skip(skip)
       .limit(limit)

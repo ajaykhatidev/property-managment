@@ -66,6 +66,11 @@ const propertySchema = new mongoose.Schema(
       type: String,
       enum: ["0", "1", "2", "3", "4", "5", "Kothi", "Plot","Ground Floor"],
     },
+    propertyCategory: {
+      type: String,
+      enum: ["residential", "commercial"],
+      required: true,
+    },
     bhk: {
       type: String,
       required: true,
