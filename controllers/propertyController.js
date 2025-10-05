@@ -16,10 +16,32 @@ const clearPropertiesCache = () => {
 const addProperty = async (req, res) => {
   try {
     console.log("📝 Received property data:", req.body);
+    console.log("🏠 Property Type:", req.body.propertyType);
+    console.log("🏠 House No:", req.body.houseNo);
+    console.log("🏪 Shop No:", req.body.shopNo);
+    console.log("📏 Shop Size:", req.body.shopSize);
     
     // Validate required fields
-    const requiredFields = ['sector', 'title', 'description', 'propertyType', 'houseNo', 'bhk', 'rentOrSale', 'hpOrFreehold', 'price', 'phoneNumber'];
+    const requiredFields = ['sector', 'title', 'description', 'propertyType', 'bhk', 'rentOrSale', 'hpOrFreehold', 'price', 'phoneNumber'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    // Conditional validation based on property type
+    if (req.body.propertyType === 'House' && !req.body.houseNo) {
+      missingFields.push('houseNo');
+      console.log("❌ Missing houseNo for House property");
+    }
+    if (req.body.propertyType === 'Shop') {
+      if (!req.body.shopNo) {
+        missingFields.push('shopNo');
+        console.log("❌ Missing shopNo for Shop property");
+      }
+      if (!req.body.shopSize) {
+        missingFields.push('shopSize');
+        console.log("❌ Missing shopSize for Shop property");
+      }
+    }
+    
+    console.log("🔍 Missing fields:", missingFields);
     
     if (missingFields.length > 0) {
       return res.status(400).json({ 
@@ -152,7 +174,7 @@ const getProperties = async (req, res) => {
     // Optimized query with lean() for better performance
     const properties = await Property
       .find(filter)
-      .select('sector title description houseNo block pocket floor bhk rentOrSale hpOrFreehold reference price phoneNumber status createdAt updatedAt')
+      .select('sector title description propertyType houseNo shopNo shopSize block pocket floor bhk rentOrSale hpOrFreehold reference price phoneNumber status createdAt updatedAt')
       .sort(sortOptions)
       .skip(skip)
       .limit(limit)

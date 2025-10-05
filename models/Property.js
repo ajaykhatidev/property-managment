@@ -39,11 +39,22 @@ const propertySchema = new mongoose.Schema(
     },
     houseNo: {
       type: String,
-      required: true,
+      required: function() {
+        return this.propertyType === "House";
+      },
+    },
+    shopNo: {
+      type: String,
+      required: function() {
+        return this.propertyType === "Shop";
+      },
     },
     shopSize: {
       type: String,
       trim: true,
+      required: function() {
+        return this.propertyType === "Shop";
+      },
     },
     block: {
       type: String,
